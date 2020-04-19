@@ -3,8 +3,11 @@ library(plotly)
 library(dplyr)
 library(tidyr)
 library(scales)
+library(googleVis)
 
 clean = read.csv("./data/Energy/clean7.csv")
+
+write.csv(clean, "clean10.csv")
 
 
 # 1. REGIONAL STATS BOX
@@ -12,14 +15,33 @@ clean = read.csv("./data/Energy/clean7.csv")
 
 
 
-## 2. REGIONAL RENEWABLE SHARE OVER TIME (maybe Total too)
+## 3. REGIONAL RENEWABLE SHARE OVER TIME (maybe Total too)
+region_ot = clean %>% filter(., Region=='Latin America & Caribbean') %>% 
+  ggplot(., aes(x=Year, y=Share.Consumption, color=Country)) +
+  geom_line() +
+  ylim(0,100) +
+  theme_bw()
+
+ggplotly(region_ot)
+#lol need to remake the regions...
 
 
+## 3.2 REGIONAL HISTOGRAM
+region_hist = clean %>% filter(., Year==2015, Region=='Latin America & Caribbean') %>% 
+  ggplot(., aes(x=Share.Consumption)) +
+  geom_histogram(bins=8) +
+  theme_bw()
+
+ggplotly(region_hist)
 
 
-## 3. REGIONAL HISTOGRAM
+## 2. REGIONAL MAPS!!
+region_map = clean %>% filter(., Year==2015, Subregion=='Western Europe') %>%
+  gvisGeoChart(., locationvar='Country', colorvar='Share.Output',
+               options=list(height=500,width=800, region='155'))
 
 
+plot(region_map)
 
 
 # 4. COUNTRY STATS BOX
@@ -105,7 +127,7 @@ ggplotly(renewable_share_TFEC_ot)
   ## Both
   ## With gather()... legend gets name of variable.
 renewable_share_both_ot = clean %>% filter(., Country=='Brazil') %>% 
-  gather(., key="measure", value="value", 4:17) %>% 
+  gather(., key="measure", value="value", 5:18) %>% 
   filter(., measure=='Share.Output' | measure=='Share.Consumption') %>% 
   ggplot(., aes(x=Year, y=value, color=measure)) +
   geom_line() +
@@ -139,9 +161,9 @@ access_ot = clean %>% filter(., Country=='Brazil') %>%
 
   ## With gather()... legend gets name of variable.
 access_ot = clean %>% filter(., Country=='Brazil') %>% 
-  gather(., key="measure", value="value", 4:17) %>% 
-  filter(., measure=='Total' | measure=='Rural' | measure=='Urban') %>% 
-  ggplot(., aes(x=Year, y=value, color=measure)) +
+  gather(., key="Pop", value="Percent", 5:18) %>% 
+  filter(., Pop=='Total' | Pop=='Rural' | Pop=='Urban') %>% 
+  ggplot(., aes(x=Year, y=Percent, color=Pop)) +
   geom_line() +
   ylim(0,100) +
   ylab("% of Pop w/ Electricity Access") +
@@ -172,11 +194,17 @@ c
 
 ## 9. INCOME LEVEL LINE CHART
 
-
+#on second thought... not a great idea...
 
 
 ## 10. INCOME LEVEL HISTOGRAM
+income_hist = clean %>% filter(., Year==2015, Income.Group=='High income') %>% 
+  group_by(., Income.Group) %>% 
+  ggplot(., aes(x=Share.Consumption)) +
+  geom_histogram(bins=8) +
+  theme_bw()
 
+ggplotly(income_hist)
 
 
 
@@ -186,12 +214,35 @@ c
 
 
 ## 12. TOP% REGION PIE
+clean %>% filter(., Year==2015) %>% 
+  arrange(., desc(Share.Output)) %>% 
+  head(10) %>%
+  plot_ly(., labels=~Region, values=~Share.Output, type='pie',
+          textposition = 'inside',
+          textinfo = 'label+percent',
+          insidetextfont = list(color = '#FFFFFF'),
+          hoverinfo = 'text',
+          text = ~paste(Country, 'AS AN EXAMPLE, probably nothing in here'),
+          marker = list(colors = colors,
+                        line = list(color = '#FFFFFF', width = 1)),
+          showlegend = FALSE)
 
 
 
 
 ## 13. TOP% INCOME PIE
-
+clean %>% filter(., Year==2015) %>% 
+  arrange(., desc(Share.Output)) %>% 
+  head(10) %>% 
+  plot_ly(., labels=~Income.Group, values=~Share.Output, type='pie',
+          textposition = 'inside',
+          textinfo = 'label+percent',
+          insidetextfont = list(color = '#FFFFFF'),
+          hoverinfo = 'text',
+          text = ~paste(Country, 'AS AN EXAMPLE, probably nothing in here'),
+          marker = list(colors = colors,
+                        line = list(color = '#FFFFFF', width = 1)),
+          showlegend = FALSE)
 
 
 
@@ -201,17 +252,22 @@ c
 
 
 ## 15. WORLD MAP
+world = clean %>% filter(., Year==2015) %>%
+  gvisGeoChart(., locationvar='Country', colorvar='Share.Output',
+               options=list(height=500,width=800))
+
+plot(world)
+
+
+#To fix up country names
+clean$Country = as.character(clean$Country)
+
+clean[clean$Code=="BHS", ] = clean %>% filter(., Code=="BHS") %>% mutate(., Country="Bahamas")
 
 
 
 
 
-## 16. REGIONAL MAP STATS BOX
-
-
-
-
-# 17. REGIONAL MAP 
 
 
 
@@ -219,31 +275,33 @@ c
 
 
 
-# Renewable Share Output Top 10, 2015
-clean %>% filter(., year==2015) %>% 
-  select(., name, renewable_share_output, renewable_output) %>% 
-  arrange(desc(renewable_share_output), desc(renewable_output)) %>% 
+
+
+# Renewable Share Output Top 10
+clean %>% filter(., Year==2015) %>% 
+  select(., Country, Share.Output, Renewable.Output) %>% 
+  arrange(desc(Share.Output), desc(Renewable.Output)) %>% 
   head(10)
 
 
-# Renewable Share Consumption Top 10, 2015
-clean %>% filter(., year==2015) %>% 
-  select(., name, renewable_share_TFEC, renewable_consumption) %>% 
-  arrange(desc(renewable_share_TFEC), desc(renewable_consumption)) %>% 
+# Renewable Share Consumption Top 10
+clean %>% filter(., Year==2015) %>% 
+  select(., Country, Share.Consumption, Renewable.Consumption) %>% 
+  arrange(desc(Share.Consumption), desc(Renewable.Consumption)) %>% 
   head(10)
 
 
-# Renewable Output Top 10, 2015
-clean %>% filter(., year==2015) %>% 
-  select(., name, renewable_share_output, renewable_output) %>% 
-  arrange(desc(renewable_output)) %>% 
+# Renewable Output Top 10
+clean %>% filter(., Year==2015) %>% 
+  select(., Country, Share.Output, Renewable.Output) %>% 
+  arrange(desc(Renewable.Output)) %>% 
   head(10)
 
 
-# Renewable Consumption Top 10, 2015
-clean %>% filter(., year==2015) %>% 
-  select(., name, renewable_share_TFEC, renewable_consumption) %>% 
-  arrange(desc(renewable_consumption)) %>% 
+# Renewable Consumption Top 10
+clean %>% filter(., Year==2015) %>% 
+  select(., Country, Share.Consumption, Renewable.Consumption) %>% 
+  arrange(desc(Renewable.Consumption)) %>% 
   head(10)
 
 

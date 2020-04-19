@@ -1,10 +1,10 @@
 library(shiny)
 library(shinythemes)
 
-clean = read.csv("./data/Energy/clean5.csv")
+clean = read.csv("./data/Energy/clean8.csv")
 
 fluidPage(
-  theme=shinytheme("darkly"),
+  theme=shinytheme("flatly"),
   tags$head(
     tags$style(HTML("
           .navbar .navbar-header {float: right}
@@ -25,36 +25,31 @@ fluidPage(
              fluidRow(
                column(3,
                       br(),
-                      "(SELECTION INPUTS)",
+                      radioButtons(
+                        inputId="worldmap_data",
+                        label="Select Data:",
+                        choices=list("Output"="Share.Output",
+                                     "Consumption"="Share.Consumption")
+                      ),
+                      sliderInput(
+                        inputId="worldmap_year",
+                        label="Select Year:",
+                        min=1990, max=2015,
+                        value=2015,
+                        sep=""
+                      ),
                       br(),
                       br(),
                       "14. (STATS BOX)"),
-               column(8,
+               column(9,
                       br(),
-                      "15. (WORLD MAP)")
+                      htmlOutput("worldmap"))
              )
              
              ), #end of HOME tabPanel
     
     navbarMenu("EXPLORE", icon=icon('compass'),
                
-               tabPanel("Regional Maps",
-                        br(),
-                        br(),
-                        br(),
-                        fluidRow(h1("Regional Renewable Energy")),
-                        fluidRow(
-                          column(3,
-                                 br(),
-                                 "(SELECTION INPUTS)",
-                                 br(),
-                                 br(),
-                                 "16. (STATS BOX)"),
-                          column(8,
-                                 br(),
-                                 "17. (REGIONAL MAP)")
-                        )
-                        ), #end of Regional Maps tabPanel
                tabPanel("Regional Zoom",
                         br(),
                         br(),
@@ -63,39 +58,74 @@ fluidPage(
                         fluidRow(
                           column(3,
                                  br(),
-                                 "(SELECTION INPUTS)",
+                                 radioButtons(
+                                   inputId="region_data",
+                                   label="Select Data:",
+                                   choices=list("Output"="Share.Output",
+                                                "Consumption"="Share.Consumption")
+                                 ),
+                                 sliderInput(
+                                   inputId="region_year",
+                                   label="Select Year for Map:",
+                                   min=1990, max=2015,
+                                   value=2015,
+                                   sep=""
+                                 ),
+                                 selectizeInput(
+                                   inputId="region_region",
+                                   label="Select Region:",
+                                   choices=unique(clean$Region)
+                                 ),
                                  br(),
                                  br(),
                                  "1. (STATS BOX)"),
                           column(4,
                                  br(),
-                                 "2. (LINE CHART)"),
-                          column(4,
+                                 "2. (MAP)"),
+                          column(5,
                                  br(),
-                                 "3. (HISTOGRAM)")
+                                 plotlyOutput("region_share"))
                         )
-                        ), #end of Regional Maps tabPanel
+                        ), #end of Regional Zoom tabPanel
                tabPanel("Country Zoom",
                         br(),
                         br(),
                         br(),
                         fluidRow(h1("Renewable Energy Insights by Country")),
                         fluidRow(
-                          column(3,
+                          column(2,
                                  br(),
-                                 "(SELECTION INPUTS)"),
-                          column(4,
+                                 selectizeInput(
+                                   inputId="country",
+                                   label="Select Country:",
+                                   choices=unique(clean$Country)
+                                 ),
+                                 sliderInput(
+                                   inputId="country_year",
+                                   label="Select Year for Stats Box:",
+                                   min=1990, max=2015,
+                                   value=2015,
+                                   sep=""
+                                 )
+                                 ),
+                          column(5,
                                  br(),
                                  "4. (STATS BOX)",
                                  br(),
+                                 br()
+                                 ),
+                          column(5,
                                  br(),
-                                 "5. (GDPPC & URBAN POP OVER TIME)"),
-                          column(4,
-                                 br(),
-                                 "6. (RENEWABLE SHARE/OUTPUT OVER TIME)",
-                                 br(),
-                                 br(),
-                                 "7. (ACCESS TO ELECTRICITY OVER TIME)")
+                                 plotlyOutput("country_share")
+                                 )
+                          ),
+                          fluidRow(
+                            column(2),
+                            column(5,
+                                   plotlyOutput("country_econ")
+                                  ),
+                            column(5,
+                                   plotlyOutput("country_electricity"))
                           )
                         ),  #end of Country Zoom tabPanel
                tabPanel("Income Zoom",
@@ -106,36 +136,75 @@ fluidPage(
                         fluidRow(
                           column(3,
                                  br(),
-                                 "(SELECTION INPUTS)",
+                                 radioButtons(
+                                   inputId="income_data",
+                                   label="Select Data:",
+                                   choices=list("Output"="Share.Output",
+                                                "Consumption"="Share.Consumption")
+                                 ),
+                                 sliderInput(
+                                   inputId="income_year",
+                                   label="Select Year:",
+                                   min=1990, max=2015,
+                                   value=2015,
+                                   sep=""
+                                 )),
+                          column(8,
                                  br(),
-                                 br(),
-                                 "8. (STATS BOX)"),
-                          column(4,
-                                 br(),
-                                 "9. (LINE CHART)"),
-                          column(4,
-                                 br(),
-                                 "10. (HISTOGRAM)")
-                        )
+                                 "8. (STATS BOX)")
+                          ),
+                        fluidRow(
+                          column(3,
+                                 selectizeInput(
+                                   inputId="income_group",
+                                   label="Select Income Group:",
+                                   choices=unique(clean$Income.Group)
+                                 )),
+                          column(8,
+                                 plotlyOutput("income_hist"))
+                          )
                         ),  #end of Income Zoom tabPanel
-               tabPanel("Top __%",
+               tabPanel("Top Countries",
                         br(),
                         br(),
                         br(),
-                        fluidRow(h1("Top __% of Countries by Share of Renewable Energy")),
+                        fluidRow(h1("Top Countries by Share of Renewable Energy")),
                         fluidRow(
                           column(3,
                                  br(),
-                                 "(SELCTION INPUTS)",
+                                 radioButtons(
+                                   inputId="top_data",
+                                   label="Select Data:",
+                                   choices=list("Output"="Share.Output",
+                                                "Consumption"="Share.Consumption")
+                                 ),
+                                 sliderInput(
+                                   inputId="top_year",
+                                   label="Select Year:",
+                                   min=1990, max=2015,
+                                   value=2015,
+                                   sep=""
+                                 ),
+                                 sliderInput(
+                                   inputId="top_number",
+                                   label="Select Number of Countries:",
+                                   min=5, max=50,
+                                   value=10,
+                                   sep="",
+                                   step=5
+                                 ),
                                  br(),
                                  br(),
                                  "11. (STATS BOX)"),
                           column(4,
                                  br(),
-                                 "12. (PIE CHART - REGION)"),
+                                 h4("Regions"),
+                                 plotlyOutput("top_region"),
+                                 ),
                           column(4,
                                  br(),
-                                 "13. (PIE CHART - INCOME LEVEL)")
+                                 h4("Income Groups"),
+                                 plotlyOutput("top_income"))
                         )
                         )   #end of Top __% tabPanel
                
