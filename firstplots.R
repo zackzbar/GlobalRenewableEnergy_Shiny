@@ -5,9 +5,10 @@ library(tidyr)
 library(scales)
 library(googleVis)
 
-clean = read.csv("./data/Energy/clean7.csv")
+clean = read.csv("./data/Energy/clean10.csv")
 
 write.csv(clean, "clean10.csv")
+
 
 
 # 1. REGIONAL STATS BOX

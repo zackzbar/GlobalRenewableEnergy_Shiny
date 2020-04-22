@@ -2,20 +2,45 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 library(plotly)
+library(googleVis)
+library(tidyverse)
+library(scales)
 
-clean = read.csv("./data/Energy/clean8.csv")
+clean = read.csv("./data/Energy/clean10.csv")
+
+clean$X.1=NULL
 
 function(input, output) {
+  
+
+  ### 2. REGION MAP
+  output$region_map = renderGvis({
+    
+    region_code=ifelse(clean[clean$Subregion==input$region_region,22][1]>100,
+                       as.character(clean[clean$Subregion==input$region_region,22][1]),
+                       ifelse(clean[clean$Subregion==input$region_region,22][1]<10,
+                              paste(as.character(0), as.character(clean[clean$Subregion==input$region_region,22][1]), sep="0"),
+                              paste(as.character(0), as.character(clean[clean$Subregion==input$region_region,22][1]), sep=""))
+                       )
+    
+    clean %>% filter(., Year==input$region_year, Subregion==input$region_region) %>%
+      gvisGeoChart(., locationvar='Country', colorvar=input$region_data,
+                   options=list(width=550,keepAspectRatio=TRUE,
+                                region=region_code))
+  })
   
   
   
   
   ### 3. REGION RENEWABLE SHARE OVER TIME 
   output$region_share = renderPlotly({
-    ggplotly(clean %>% filter(., Region==input$region_region) %>% 
-      ggplot(., aes(x=Year, y=Share.Consumption, color=Country)) +
+    ggplotly(clean %>% filter(., Subregion==input$region_region) %>% 
+      ggplot(., aes_string(x="Year", y=input$region_data, color="Country")) +
       geom_line() +
       ylim(0,100) +
+      ylab("Renewable Share (%)") +
+      xlab("") +
+      ggtitle("Renewable Share of Energy") +
       theme_bw()
     )
   })
@@ -89,7 +114,7 @@ function(input, output) {
   ### 10. INCOME HISTOGRAM
   output$income_hist = renderPlotly({
     ggplotly(clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
-      ggplot(., aes(x=Share.Consumption)) +
+      ggplot(., aes_string(x=input$income_data)) +
       geom_histogram(bins=8) +
       theme_bw()
     )

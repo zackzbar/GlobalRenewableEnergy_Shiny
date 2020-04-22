@@ -1,7 +1,7 @@
 library(shiny)
 library(shinythemes)
 
-clean = read.csv("./data/Energy/clean8.csv")
+clean = read.csv("./data/Energy/clean10.csv")
 
 fluidPage(
   theme=shinytheme("flatly"),
@@ -56,7 +56,7 @@ fluidPage(
                         br(),
                         fluidRow(h1("Renewable Energy Insights by Region")),
                         fluidRow(
-                          column(3,
+                          column(2,
                                  br(),
                                  radioButtons(
                                    inputId="region_data",
@@ -64,6 +64,7 @@ fluidPage(
                                    choices=list("Output"="Share.Output",
                                                 "Consumption"="Share.Consumption")
                                  ),
+                                 br(),
                                  sliderInput(
                                    inputId="region_year",
                                    label="Select Year for Map:",
@@ -71,18 +72,21 @@ fluidPage(
                                    value=2015,
                                    sep=""
                                  ),
+                                 br(),
                                  selectizeInput(
                                    inputId="region_region",
                                    label="Select Region:",
-                                   choices=unique(clean$Region)
+                                   choices=unique(sort(clean$Subregion))
+                                 )
                                  ),
-                                 br(),
-                                 br(),
-                                 "1. (STATS BOX)"),
-                          column(4,
-                                 br(),
-                                 "2. (MAP)"),
                           column(5,
+                                 br(),
+                                 br(),
+                                 br(),
+                                 br(),
+                                 htmlOutput("region_map")),
+                          column(5,
+                                 br(),
                                  br(),
                                  plotlyOutput("region_share"))
                         )
