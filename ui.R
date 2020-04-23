@@ -1,7 +1,3 @@
-library(shiny)
-library(shinythemes)
-
-clean = read.csv("./data/Energy/clean10.csv")
 
 fluidPage(
   theme=shinytheme("flatly"),
@@ -214,8 +210,26 @@ fluidPage(
                
                ), #end of EXPLORE navbarMenu
     
-    tabPanel("DATA", icon=icon("table")
+    tabPanel("DATA", icon=icon("table"),
+             br(),
+             br(),
+             br(),
+             h3("All data courtesy of the World Bank Open Data Catalog."),
+             "See below for links to individual datasets, and the combined dataset used for this site.",
+             br(),
+             br(),
+             uiOutput("renewable"),
+             uiOutput("gdp"),
+             uiOutput("pop"),
+             br(),
+             br(),
              
+             
+             fluidRow(
+               column(12,
+                      DT::dataTableOutput("table"))
+             ),
+             br()
              ), #end of DATA tabPanel
     
     tabPanel("ABOUT ME", icon=icon('user'),

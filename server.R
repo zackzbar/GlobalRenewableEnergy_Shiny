@@ -1,16 +1,34 @@
-library(shiny)
-library(dplyr)
-library(ggplot2)
-library(plotly)
-library(googleVis)
-library(tidyverse)
-library(scales)
-
-clean = read.csv("./data/Energy/clean10.csv")
-
-clean$X.1=NULL
 
 function(input, output) {
+  
+  
+  
+  ### DATA TABLE
+  output$table = DT::renderDataTable({
+    datatable(clean, rownames = F) 
+  })
+  
+  
+  
+  ### DATA LINKS
+  url_renewable = a("SE4ALL Data", href="https://datacatalog.worldbank.org/dataset/sustainable-energy-all")
+  url_gdp = a("GDP Data", href="https://data.worldbank.org/indicator/NY.GDP.MKTP.CD?end=2018&start=1990&view=chart")
+  url_pop = a("Population Data", href="https://data.worldbank.org/indicator/sp.pop.totl?end=2015&start=1990")
+  
+  output$renewable <- renderUI({
+    tagList("Renewable Data Link:", url_renewable)
+  })
+  
+  output$gdp <- renderUI({
+    tagList("GDP Data Link:", url_gdp)
+  })
+  
+  output$pop <- renderUI({
+    tagList("Population Data Link:", url_pop)
+  })
+  
+  
+  
   
 
   ### 2. REGION MAP
