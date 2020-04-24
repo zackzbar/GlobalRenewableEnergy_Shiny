@@ -13,6 +13,14 @@ write.csv(clean, "clean10.csv")
 
 
 
+cleancopy = clean
+
+cleancopy = cleancopy %>% mutate(., Renewable.Consumption=Renewable.Consumption*.277777778)
+
+
+write.csv(cleancopy, "clean11.csv")
+
+
 
 
 
@@ -253,6 +261,23 @@ urban_pop_ot = clean %>% filter(., Country=="Brazil") %>%
   ylim(0,100)
 
 ggplotly(urban_pop_ot)
+
+
+output$country_urbanpop = renderPlotly({
+  ggplotly(clean %>% filter(., Country==input$country) %>% 
+             ggplot(aes(x=Year, y=Urban.Population)) +
+             geom_line() +
+             ylim(0,100) +
+             ylab("Population (%)") +
+             xlab("") +
+             ggtitle("Percent of Poplation in Urban Areas") +
+             theme_bw(),
+           height = 375
+  )
+})
+
+
+
 
   ## Both
   # With normal table... legend gets messed up.

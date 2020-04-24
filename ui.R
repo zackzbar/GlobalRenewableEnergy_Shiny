@@ -21,12 +21,41 @@ fluidPage(
              fluidRow(
                column(3,
                       br(),
-                      radioButtons(
-                        inputId="worldmap_data",
-                        label="Select Data:",
-                        choices=list("Output"="Share.Output",
-                                     "Consumption"="Share.Consumption")
+                      "Explore data from the World Bank's",
+                      br(),
+                      "Sustainable Energy for All Initiative!",
+                      br(),
+                      br(),
+                      "Browse by Region, Country and Income Group.",
+                      br(),
+                      "Hover over maps and plots for details."
                       ),
+               column(2,
+                      br(),
+                      wellPanel(h4(strong("Top Countries By")),
+                                h4(strong(htmlOutput("worldmap_stats_data"))))
+                      ),
+               column(2,
+                      br(),
+                      wellPanel(h4(strong(htmlOutput("worldmap_stats_1"))),
+                                h4(strong(htmlOutput("worldmap_stats_12")))
+                                )
+                      ),
+               column(2,
+                      br(),
+                      wellPanel(h4(strong(htmlOutput("worldmap_stats_2"))),
+                                h4(strong(htmlOutput("worldmap_stats_22")))
+                                )
+                      ),
+               column(2,
+                      br(),
+                      wellPanel(h4(strong(htmlOutput("worldmap_stats_3"))),
+                                h4(strong(htmlOutput("worldmap_stats_32")))
+                                )
+                      )
+               ),
+             fluidRow(
+               column(3,
                       br(),
                       sliderInput(
                         inputId="worldmap_year",
@@ -35,17 +64,20 @@ fluidPage(
                         value=2015,
                         sep=""
                       ),
-                      br(),
-                      "BLURB?",
-                      br()),
+                      radioButtons(
+                        inputId="worldmap_data",
+                        label="Select Data:",
+                        choices=list("Renewable Share, Electricity Output (%)"="Share.Output",
+                                     "Renewable Share, TFEC (%)"="Share.TFEC",
+                                     "Renewable Electricity Output (GWh)"="Renewable.Output",
+                                     "Renewable TFEC (GWh)"="Renewable.TFEC")
+                      ),
+                      "TFEC = Total Final Energy Consumption"),
                column(8,
-                      br(),
-                      "STATS BOXES",
-                      br(),
                       plotlyOutput("worldmap2"))
-                      #htmlOutput("worldmap"))
-             )
-             
+               #htmlOutput("worldmap"))
+               )
+
              ), #end of HOME tabPanel
     
     navbarMenu("EXPLORE", icon=icon('compass'),
@@ -61,8 +93,8 @@ fluidPage(
                                  radioButtons(
                                    inputId="region_data",
                                    label="Select Data:",
-                                   choices=list("Output"="Share.Output",
-                                                "Consumption"="Share.Consumption")
+                                   choices=list("Share of Output as Renewable (%)"="Share.Output",
+                                                "Share of TFEC as Renewable (%)"="Share.TFEC")
                                  ),
 #                                 br(),
 #                                 sliderInput(
@@ -108,15 +140,12 @@ fluidPage(
                           column(5,
                                  br(),
                                  plotlyOutput("country_share"),
-                                 br(),
-                                 plotlyOutput("country_electricity"),
-                                 br()
+                                 plotlyOutput("country_electricity")
                                  ),
-                          column(4,
+                          column(5,
                                  br(),
-                                 plotlyOutput("country_gdppc"),
-                                 br(),
-                                 plotlyOutput("country_urbanpop")
+                                 plotlyOutput("country_total"),
+                                 plotlyOutput("country_gdppc")
                                  )
                           )
                         ),  #end of Country Zoom tabPanel
@@ -131,10 +160,37 @@ fluidPage(
                                  radioButtons(
                                    inputId="income_data",
                                    label="Select Data:",
-                                   choices=list("Output"="Share.Output",
-                                                "Consumption"="Share.Consumption")
-                                 ),
+                                   choices=list("Renewable Share, Electricity Output (%)"="Share.Output",
+                                                "Renewable Share, TFEC (%)"="Share.TFEC",
+                                                "Renewable Electricity Output (GWh)"="Renewable.Output",
+                                                "Renewable TFEC (GWh)"="Renewable.TFEC")
+                                 )),
+                          column(2,
                                  br(),
+                                 wellPanel(h4(strong("Top Countries By")),
+                                           h4(strong(htmlOutput("income_stats_data"))))
+                                 ),
+                          column(2,
+                                 br(),
+                                 wellPanel(h4(strong(htmlOutput("income_stats_1"))),
+                                           h4(strong(htmlOutput("income_stats_12")))
+                                 )
+                                 ),
+                          column(2,
+                                 br(),
+                                 wellPanel(h4(strong(htmlOutput("income_stats_2"))),
+                                           h4(strong(htmlOutput("income_stats_22")))
+                                 )
+                                 ),
+                          column(2,
+                                 br(),
+                                 wellPanel(h4(strong(htmlOutput("income_stats_3"))),
+                                           h4(strong(htmlOutput("income_stats_32")))
+                                 )
+                                 )
+                        ),
+                        fluidRow(
+                          column(3,
                                  sliderInput(
                                    inputId="income_year",
                                    label="Select Year:",
@@ -147,27 +203,27 @@ fluidPage(
                                    inputId="income_group",
                                    label="Select Income Group:",
                                    choices=unique(clean$Income.Group)
-                                 )),
+                                 )
+                                 ),
                           column(8,
-                                 br(),
-                                 "8. (STATS BOX)",
-                                 br(),
-                                 plotlyOutput("income_hist"))
-                          )
+                                 plotOutput("income_hist"))
+                                 )
                         ),  #end of Income Zoom tabPanel
                tabPanel("Top Countries",
                         br(),
                         br(),
                         br(),
-                        fluidRow(h1("Top Countries by Share of Renewable Energy")),
+                        fluidRow(h1("Top Countries for Renewable Energy")),
                         fluidRow(
                           column(3,
                                  br(),
                                  radioButtons(
                                    inputId="top_data",
                                    label="Select Data:",
-                                   choices=list("Output"="Share.Output",
-                                                "Consumption"="Share.Consumption")
+                                   choices=list("Renewable Share, Electricity Output (%)"="Share.Output",
+                                                "Renewable Share, TFEC (%)"="Share.TFEC",
+                                                "Renewable Electricity Output (GWh)"="Renewable.Output",
+                                                "Renewable TFEC (GWh)"="Renewable.TFEC")
                                  ),
                                  br(),
                                  sliderInput(

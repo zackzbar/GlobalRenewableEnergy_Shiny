@@ -65,38 +65,28 @@ function(input, output) {
   
   
   
-  ### 5. COUNTRY GDPPC & URBAN POP OVER TIME
+  ### 5. COUNTRY GDPPC OVER TIME
   output$country_gdppc = renderPlotly({
     ggplotly(clean %>% filter(., Country==input$country) %>% 
       ggplot(aes(x=Year, y=GDP.PC)) +
       geom_line() +
-      ylab("GDP PC") +
+      ylab("GDP PC (USD)") +
       xlab("") +
       ggtitle("GDP Per Capita") +
       theme_bw(),
-    height = 300
+    height = 375
       )
   })
   
-  output$country_urbanpop = renderPlotly({
-    ggplotly(clean %>% filter(., Country==input$country) %>% 
-      ggplot(aes(x=Year, y=Urban.Population)) +
-      geom_line() +
-      ylim(0,100) +
-      ylab("Population (%)") +
-      xlab("") +
-      ggtitle("Percent of Poplation in Urban Areas") +
-      theme_bw(),
-      height = 300
-    )
-  })
+  
+
   
   
-  ### 6. COUNTRY RENEWABLE SHARE OVER TIME
+  ### 6. COUNTRY RENEWABLE SHARES AND TOTALS OVER TIME
   output$country_share = renderPlotly({
     ggplotly(clean %>% filter(., Country==input$country) %>% 
       gather(., key="Measure", value="Percent", 5:18) %>% 
-      filter(., Measure=='Share.Output' | Measure=='Share.Consumption') %>% 
+      filter(., Measure=='Share.Output' | Measure=='Share.TFEC') %>% 
       ggplot(., aes(x=Year, y=Percent, color=Measure)) +
       geom_line() +
       ylim(0,100) +
@@ -105,9 +95,27 @@ function(input, output) {
       ggtitle("Renewable Share of Energy") +
       theme_bw() +
       scale_color_manual(name="", 
-                           labels = c("Share.Output", "Share.Consumption"),
-                           values = c("Share.Output"="blue", "Share.Consumption"="black")),
-      height=300
+                           labels = c("Share.Output", "Share.TFEC"),
+                           values = c("Share.Output"="blue", "Share.TFEC"="black")),
+      height=375
+    )
+  })
+  
+
+  output$country_total = renderPlotly({
+    ggplotly(clean %>% filter(., Country==input$country) %>% 
+               gather(., key="Measure", value="GWh", 5:18) %>% 
+               filter(., Measure=='Renewable.Output' | Measure=='Renewable.TFEC') %>% 
+               ggplot(., aes(x=Year, y=GWh, color=Measure)) +
+               geom_line() +
+               ylab("Energy/Electricity (GWh)") +
+               xlab("") +
+               ggtitle("Renewable Output and TFEC") +
+               theme_bw() +
+               scale_color_manual(name="", 
+                                  labels = c("Renewable.Output", "Renewable.TFEC"),
+                                  values = c("Renewable.Output"="blue", "Renewable.TFEC"="black")),
+             height=375
     )
   })
   
@@ -127,7 +135,7 @@ function(input, output) {
       scale_color_manual(name="", 
                          labels = c("Rural", "Total", "Urban"),
                          values = c("Rural"="blue", "Total"="black", "Urban"="darkgreen")),
-      height=300
+      height=375
     )
     
   })
@@ -135,13 +143,79 @@ function(input, output) {
   
   
   ### 10. INCOME HISTOGRAM
-  output$income_hist = renderPlotly({
-    ggplotly(clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
+  output$income_hist = renderPlot({
+    clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
       ggplot(., aes_string(x=input$income_data)) +
       geom_histogram(bins=8) +
-      theme_bw()
-    )
+      ggtitle("Distribution of Countries by Income Group") +
+      ylab("Count of Countries") +
+      theme_bw() +
+      theme(plot.title = element_text(size=22, lineheight = 10),
+            axis.title.y = element_text(size=18),
+            axis.title.x = element_text(size=18))
   })
+  
+  
+  ### INCOME STATS BOX
+  
+  output$income_stats_data = renderText(input$income_data)
+  
+  
+  output$income_stats_1 = renderText({
+    stats = clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
+      arrange(desc(eval(as.symbol(input$income_data)))) %>% 
+      select(., Country)
+    
+    paste("1. ", as.character(stats[1,1]))
+    
+  })
+  
+  output$income_stats_12 = renderText({
+    stats = clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
+      arrange(desc(eval(as.symbol(input$income_data))))
+    
+    paste("Value: ", as.character(round(stats[1,input$income_data], digits=2)))
+    
+  })
+  
+  output$income_stats_2 = renderText({
+    stats = clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
+      arrange(desc(eval(as.symbol(input$income_data)))) %>% 
+      select(., Country)
+    
+    paste("2. ", as.character(stats[2,1]))
+    
+  })
+  
+  output$income_stats_22 = renderText({
+    stats = clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
+      arrange(desc(eval(as.symbol(input$income_data))))
+    
+    paste("Value: ", as.character(round(stats[2,input$income_data], digits=2)))
+    
+  })
+  
+  output$income_stats_3 = renderText({
+    stats = clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
+      arrange(desc(eval(as.symbol(input$income_data)))) %>% 
+      select(., Country)
+    
+    paste("3. ", as.character(stats[3,1]))
+    
+  })
+  
+  output$income_stats_32 = renderText({
+    stats = clean %>% filter(., Year==input$income_year, Income.Group==input$income_group) %>% 
+      arrange(desc(eval(as.symbol(input$income_data))))
+    
+    paste("Value: ", as.character(round(stats[3,input$income_data], digits=2)))
+    
+  })
+  
+  
+  
+  
+  
   
   
   
@@ -149,9 +223,9 @@ function(input, output) {
   ### 12. Top Region Pie
   output$top_region = renderPlotly({
     clean %>% filter(., Year==input$top_year) %>% 
-      arrange(., desc(Share.Output)) %>% 
+      arrange(., desc(eval(as.symbol(input$top_data)))) %>% 
       head(input$top_number) %>%
-      plot_ly(., labels=~Region, values=~Share.Output, type='pie',
+      plot_ly(., labels=~Region, values=~eval(as.symbol(input$top_data)), type='pie',
               textposition = 'inside',
               textinfo = 'label+percent',
               insidetextfont = list(color = '#FFFFFF'),
@@ -168,7 +242,7 @@ function(input, output) {
   ### 13. Top Income Pie
   output$top_income = renderPlotly({
     clean13 = clean %>% filter(., Year==input$top_year) %>% 
-      arrange(., desc(Share.Output)) %>% 
+      arrange(., desc(eval(as.symbol(input$top_data)))) %>% 
       head(input$top_number)
                                                         
     plot_ly(clean13, labels=clean13$Income.Group, values=clean13[ , input$income_data], type='pie',
@@ -184,7 +258,12 @@ function(input, output) {
   
   
   
+  
+  
+  
+  
   ### 15. World Map
+  
 #  output$worldmap = renderGvis({
 #    clean %>% filter(., Year==input$worldmap_year) %>%
 #      gvisGeoChart(., locationvar='Country', colorvar=input$worldmap_data,
@@ -214,7 +293,7 @@ function(input, output) {
                 text = clean1$Country, 
                 locations = clean1$Code, 
                 marker = list(line = list(color = toRGB("grey"), width = 0.5))) %>% 
-      colorbar(title = '% Renewable Energy', ticksuffix = '%') %>% 
+      colorbar(title = '', ticksuffix = '') %>% 
       layout(geo = list(
         showframe = FALSE,
         showcoastlines = FALSE,
@@ -223,6 +302,64 @@ function(input, output) {
     
   })
   
+  
+  
+  ### WORLD MAP STATS BOX
+  
+  
+  output$worldmap_stats_data = renderText(input$worldmap_data)
+  
+  
+  output$worldmap_stats_1 = renderText({
+    stats = clean %>% filter(., Year==input$worldmap_year) %>% 
+      arrange(desc(eval(as.symbol(input$worldmap_data)))) %>% 
+      select(., Country)
+    
+    paste("1. ", as.character(stats[1,1]))
+    
+  })
+  
+  output$worldmap_stats_12 = renderText({
+    stats = clean %>% filter(., Year==input$worldmap_year) %>% 
+      arrange(desc(eval(as.symbol(input$worldmap_data))))
+    
+    paste("Value: ", as.character(round(stats[1,input$worldmap_data], digits=2)))
+    
+  })
+  
+  output$worldmap_stats_2 = renderText({
+    stats = clean %>% filter(., Year==input$worldmap_year) %>% 
+      arrange(desc(eval(as.symbol(input$worldmap_data)))) %>% 
+      select(., Country)
+    
+    paste("2. ", as.character(stats[2,1]))
+    
+  })
+  
+  output$worldmap_stats_22 = renderText({
+    stats = clean %>% filter(., Year==input$worldmap_year) %>% 
+      arrange(desc(eval(as.symbol(input$worldmap_data))))
+    
+    paste("Value: ", as.character(round(stats[2,input$worldmap_data], digits=2)))
+    
+  })
+  
+  output$worldmap_stats_3 = renderText({
+    stats = clean %>% filter(., Year==input$worldmap_year) %>% 
+      arrange(desc(eval(as.symbol(input$worldmap_data)))) %>% 
+      select(., Country)
+    
+    paste("3. ", as.character(stats[3,1]))
+    
+  })
+  
+  output$worldmap_stats_32 = renderText({
+    stats = clean %>% filter(., Year==input$worldmap_year) %>% 
+      arrange(desc(eval(as.symbol(input$worldmap_data))))
+    
+    paste("Value: ", as.character(round(stats[3,input$worldmap_data], digits=2)))
+    
+  })
 
   
   
