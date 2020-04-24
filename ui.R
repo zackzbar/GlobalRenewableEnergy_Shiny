@@ -27,6 +27,7 @@ fluidPage(
                         choices=list("Output"="Share.Output",
                                      "Consumption"="Share.Consumption")
                       ),
+                      br(),
                       sliderInput(
                         inputId="worldmap_year",
                         label="Select Year:",
@@ -35,18 +36,21 @@ fluidPage(
                         sep=""
                       ),
                       br(),
+                      "BLURB?",
+                      br()),
+               column(8,
                       br(),
-                      "14. (STATS BOX)"),
-               column(9,
+                      "STATS BOXES",
                       br(),
-                      htmlOutput("worldmap"))
+                      plotlyOutput("worldmap2"))
+                      #htmlOutput("worldmap"))
              )
              
              ), #end of HOME tabPanel
     
     navbarMenu("EXPLORE", icon=icon('compass'),
                
-               tabPanel("Regional Zoom",
+               tabPanel("Region",
                         br(),
                         br(),
                         br(),
@@ -60,14 +64,14 @@ fluidPage(
                                    choices=list("Output"="Share.Output",
                                                 "Consumption"="Share.Consumption")
                                  ),
-                                 br(),
-                                 sliderInput(
-                                   inputId="region_year",
-                                   label="Select Year for Map:",
-                                   min=1990, max=2015,
-                                   value=2015,
-                                   sep=""
-                                 ),
+#                                 br(),
+#                                 sliderInput(
+#                                   inputId="region_year",
+#                                   label="Select Year for Map:",
+#                                   min=1990, max=2015,
+#                                   value=2015,
+#                                   sep=""
+#                                 ),
                                  br(),
                                  selectizeInput(
                                    inputId="region_region",
@@ -75,19 +79,19 @@ fluidPage(
                                    choices=unique(sort(clean$Subregion))
                                  )
                                  ),
-                          column(5,
-                                 br(),
-                                 br(),
-                                 br(),
-                                 br(),
-                                 htmlOutput("region_map")),
-                          column(5,
+#                          column(5,
+#                                 br(),
+#                                 br(),
+#                                 br(),
+#                                 br(),
+#                                 htmlOutput("region_map")),
+                          column(10,
                                  br(),
                                  br(),
                                  plotlyOutput("region_share"))
                         )
                         ), #end of Regional Zoom tabPanel
-               tabPanel("Country Zoom",
+               tabPanel("Country",
                         br(),
                         br(),
                         br(),
@@ -99,36 +103,24 @@ fluidPage(
                                    inputId="country",
                                    label="Select Country:",
                                    choices=unique(clean$Country)
-                                 ),
-                                 sliderInput(
-                                   inputId="country_year",
-                                   label="Select Year for Stats Box:",
-                                   min=1990, max=2015,
-                                   value=2015,
-                                   sep=""
                                  )
                                  ),
                           column(5,
                                  br(),
-                                 "4. (STATS BOX)",
+                                 plotlyOutput("country_share"),
                                  br(),
+                                 plotlyOutput("country_electricity"),
                                  br()
                                  ),
-                          column(5,
+                          column(4,
                                  br(),
-                                 plotlyOutput("country_share")
+                                 plotlyOutput("country_gdppc"),
+                                 br(),
+                                 plotlyOutput("country_urbanpop")
                                  )
-                          ),
-                          fluidRow(
-                            column(2),
-                            column(5,
-                                   plotlyOutput("country_econ")
-                                  ),
-                            column(5,
-                                   plotlyOutput("country_electricity"))
                           )
                         ),  #end of Country Zoom tabPanel
-               tabPanel("Income Zoom",
+               tabPanel("Income Group",
                         br(),
                         br(),
                         br(),
@@ -142,25 +134,24 @@ fluidPage(
                                    choices=list("Output"="Share.Output",
                                                 "Consumption"="Share.Consumption")
                                  ),
+                                 br(),
                                  sliderInput(
                                    inputId="income_year",
                                    label="Select Year:",
                                    min=1990, max=2015,
                                    value=2015,
                                    sep=""
-                                 )),
-                          column(8,
+                                 ),
                                  br(),
-                                 "8. (STATS BOX)")
-                          ),
-                        fluidRow(
-                          column(3,
                                  selectizeInput(
                                    inputId="income_group",
                                    label="Select Income Group:",
                                    choices=unique(clean$Income.Group)
                                  )),
                           column(8,
+                                 br(),
+                                 "8. (STATS BOX)",
+                                 br(),
                                  plotlyOutput("income_hist"))
                           )
                         ),  #end of Income Zoom tabPanel
@@ -178,6 +169,7 @@ fluidPage(
                                    choices=list("Output"="Share.Output",
                                                 "Consumption"="Share.Consumption")
                                  ),
+                                 br(),
                                  sliderInput(
                                    inputId="top_year",
                                    label="Select Year:",
@@ -185,6 +177,7 @@ fluidPage(
                                    value=2015,
                                    sep=""
                                  ),
+                                 br(),
                                  sliderInput(
                                    inputId="top_number",
                                    label="Select Number of Countries:",
@@ -192,18 +185,15 @@ fluidPage(
                                    value=10,
                                    sep="",
                                    step=5
-                                 ),
-                                 br(),
-                                 br(),
-                                 "11. (STATS BOX)"),
+                                 )),
                           column(4,
                                  br(),
-                                 h4("Regions"),
+                                 h4("Top Countries by Region"),
                                  plotlyOutput("top_region"),
                                  ),
                           column(4,
                                  br(),
-                                 h4("Income Groups"),
+                                 h4("Top Countries by Income Group"),
                                  plotlyOutput("top_income"))
                         )
                         )   #end of Top __% tabPanel
@@ -223,8 +213,6 @@ fluidPage(
              uiOutput("pop"),
              br(),
              br(),
-             
-             
              fluidRow(
                column(12,
                       DT::dataTableOutput("table"))
@@ -234,11 +222,46 @@ fluidPage(
     
     tabPanel("ABOUT ME", icon=icon('user'),
              br(),
+             fluidRow(
+               column(3,
+                      br(),
+                      br(),
+                      br(),
+                      img(src="eel.jpg", width="100%")),
+               column(4,
+                      br(),
+                      br(),
+                      h3(strong("Zack Zbar")),
+                      h5("zackzbar@gmail.com"),
+                      tags$a(
+                        href="https://www.linkedin.com/in/zackzbar/",
+                        img(
+                          src="linkedin.png",
+                          title="linkedin",
+                          height="40px"
+                        )
+                      ),
+                      tags$a(
+                        href="https://github.com/zackzbar",
+                        img(
+                          src="github.png",
+                          title="github",
+                          height="40px"
+                        )
+                      ),
+                      br(),
+                      br(),
+                      "I believe insight",
+                      br(),
+                      "from information",
+                      br(),
+                      "is essential",
+                      br(),
+                      "if we are to keep",
+                      br(),
+                      "this beautiful world.")),
              br(),
-             br(),
-             br(),
-             "I believe insight from information is essential if we are to keep this beautiful world."
-             
+             br()
              ) #end of ABOUT ME tabPanel
     
   )

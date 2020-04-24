@@ -11,6 +11,192 @@ write.csv(clean, "clean10.csv")
 
 
 
+
+
+
+
+
+download.file("http://thematicmapping.org/downloads/TM_WORLD_BORDERS_SIMPL-0.3.zip" , destfile="data/world_shape_file.zip")
+
+system("unzip data/world_shape_file.zip")
+
+
+library(rgdal)
+world_spdf <- readOGR( 
+  dsn= paste0(getwd(),"/data/world_shape_file/") , 
+  layer="TM_WORLD_BORDERS_SIMPL-0.3",
+  verbose=FALSE
+)
+
+# Clean the data object
+library(dplyr)
+world_spdf@data$POP2005[ which(world_spdf@data$POP2005 == 0)] = NA
+world_spdf@data$POP2005 <- as.numeric(as.character(world_spdf@data$POP2005)) / 1000000 %>% round(2)
+
+library(leaflet)
+
+# Create a color palette for the map:
+mypalette <- colorNumeric( palette="viridis", domain=world_spdf@data$POP2005, na.color="transparent")
+mypalette(c(45,43))
+
+# Basic choropleth with leaflet?
+m <- leaflet(world_spdf) %>% 
+  addTiles()  %>% 
+  setView( lat=10, lng=0 , zoom=2) %>%
+  addPolygons( fillColor = ~mypalette(POP2005), stroke=FALSE )
+
+m
+
+
+
+
+
+
+
+
+
+ggplot() +
+  geom_polygon(data = world_spdf, aes( x = long, y = lat, group = group)) +
+  theme_void() +
+  coord_map()
+
+
+
+
+
+library(maps)
+countries = map_data("world")
+
+cleancopy = clean
+
+cleancopy$Country = as.character(clean$Country)
+
+cleancopy[cleancopy$Code=="USA", ] = cleancopy %>% filter(., Code=="USA") %>% mutate(., Country="USA")
+
+ggmap = left_join(countries, filter(cleancopy, Year==2015), by=c("region"="Country"))
+ggmap
+
+ggplot(data = ggmap, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group, fill = Share.Output)) +
+  scale_fill_continuous(high='darkgreen', low='white') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        axis.text=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.title=element_blank(), 
+        legend.position = c(0.95,0.28), 
+        legend.background=element_rect(fill="white", colour="white") ) #+ 
+  #coord_map('mercator')
+
+
+
+
+ggplot(data=cleancopy) +
+  geom_map(map = countries, aes(map_id=Country, fill=Share.Output), color='gray40') + 
+  expand_limits(x=countries$long, y=countries$lat) + 
+  scale_fill_continuous(high='darkgreen', low='white') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        axis.text=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.title=element_blank(), 
+        legend.position = c(0.95,0.28), 
+        legend.background=element_rect(fill="white", colour="white") ) + 
+  coord_map('mercator') +
+  labs(title='Number of Murders Country-wide in 1973')
+
+
+
+
+
+
+
+
+clean1 = clean %>% filter(., Year==2015)
+
+plot_ly(data=clean1, type='choropleth', locations=clean1$Code, z=clean1$Share.Output, 
+          text=clean1$Country, colorscale="Greens")
+
+
+plot_geo(clean1) %>% 
+  add_trace(z = clean1$Share.Output, color = clean1$Share.Output, 
+            colors = 'Greens',
+            text = clean1$Country, 
+            locations = clean1$Code, 
+            marker = list(line = list(color = toRGB("grey"), width = 0.5))) %>% 
+  colorbar(title = '% Renewable Energy', ticksuffix = '%') %>% 
+  layout(geo = list(
+    showframe = FALSE,
+    showcoastlines = FALSE,
+    projection = list(type = 'Mercator')
+  ))
+
+
+
+
+
+
+
+clean %>% filter(., Year==2015, Country=="Brazil")
+
+
+
+
+
+
+
+
+
+
+library(plotly)
+library(rjson)
+
+url <- 'data/countries.geojson'
+counties <- rjson::fromJSON(file=url)
+url2<- "https://raw.githubusercontent.com/plotly/datasets/master/fips-unemp-16.csv"
+df <- read.csv(url2, colClasses=c(fips="character"))
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+fig <- plot_ly()
+fig <- fig %>% add_trace(
+  type="choropleth",
+  geojson=counties,
+  locations=df$fips,
+  z=df$unemp,
+  colorscale="Viridis",
+  zmin=0,
+  zmax=12,
+  marker=list(line=list(
+    width=0)
+  )
+)
+fig <- fig %>% colorbar(title = "Unemployment Rate (%)")
+fig <- fig %>% layout(
+  title = "2016 US Unemployment by County"
+)
+
+fig <- fig %>% layout(
+  geo = g
+)
+
+fig
+
+
+
+
+
+
+
+
+
+
+
 # 1. REGIONAL STATS BOX
 
 
@@ -81,6 +267,28 @@ gdp_urban_ot = clean %>% filter(., Country=="Brazil") %>%
                        guide = "legend") +
   ylim(0,100) + 
   theme_bw()
+
+
+#the full one....
+output$country_econ = renderPlotly({
+  ggplotly(clean %>% filter(., Country==input$country) %>% 
+             select(., Year, GDP.PC, Urban) %>% 
+             mutate(., `GDPPC`=rescale(GDP.PC)*100) %>% 
+             gather(., key="Measure", value="Value", 2:4) %>% 
+             filter(., Measure=='GDPPC' | Measure=='Urban') %>% 
+             ggplot(., aes(x=Year, y=Value, color=Measure)) +
+             geom_line() +
+             ylim(0,100) + 
+             ylab("Pop. (%); GDPPC 0-100") +
+             xlab("") +
+             ggtitle("Urban Population %, and GDPPC Scaled") +
+             theme_bw() +
+             scale_color_manual(name="", 
+                                labels = c("GDPPC", "Urban"),
+                                values = c("GDPPC"="blue", "Urban"="black")),
+           height=300
+  )
+})
 
   ## Both
   # With gather()... legend gets name of variable.

@@ -66,23 +66,28 @@ function(input, output) {
   
   
   ### 5. COUNTRY GDPPC & URBAN POP OVER TIME
-  output$country_econ = renderPlotly({
+  output$country_gdppc = renderPlotly({
     ggplotly(clean %>% filter(., Country==input$country) %>% 
-      select(., Year, GDP.PC, Urban) %>% 
-      mutate(., `GDPPC`=rescale(GDP.PC)*100) %>% 
-      gather(., key="Measure", value="Value", 2:4) %>% 
-      filter(., Measure=='GDPPC' | Measure=='Urban') %>% 
-      ggplot(., aes(x=Year, y=Value, color=Measure)) +
+      ggplot(aes(x=Year, y=GDP.PC)) +
       geom_line() +
-      ylim(0,100) + 
-      ylab("Pop. (%); GDPPC 0-100") +
+      ylab("GDP PC") +
       xlab("") +
-      ggtitle("Urban Population %, and GDPPC Scaled") +
-      theme_bw() +
-      scale_color_manual(name="", 
-                           labels = c("GDPPC", "Urban"),
-                           values = c("GDPPC"="blue", "Urban"="black")),
-      height=300
+      ggtitle("GDP Per Capita") +
+      theme_bw(),
+    height = 300
+      )
+  })
+  
+  output$country_urbanpop = renderPlotly({
+    ggplotly(clean %>% filter(., Country==input$country) %>% 
+      ggplot(aes(x=Year, y=Urban.Population)) +
+      geom_line() +
+      ylim(0,100) +
+      ylab("Population (%)") +
+      xlab("") +
+      ggtitle("Percent of Poplation in Urban Areas") +
+      theme_bw(),
+      height = 300
     )
   })
   
@@ -151,24 +156,27 @@ function(input, output) {
               textinfo = 'label+percent',
               insidetextfont = list(color = '#FFFFFF'),
               hoverinfo = 'text',
-              text = ~paste(Country, 'AS AN EXAMPLE, probably nothing in here'),
+              text = ~paste("Top Country in Region: ", Country),
               marker = list(colors = colors,
                             line = list(color = '#FFFFFF', width = 1)),
               showlegend = FALSE)
   })
   
   
+  
+  
   ### 13. Top Income Pie
   output$top_income = renderPlotly({
-    clean %>% filter(., Year==input$top_year) %>% 
+    clean13 = clean %>% filter(., Year==input$top_year) %>% 
       arrange(., desc(Share.Output)) %>% 
-      head(input$top_number) %>% 
-      plot_ly(., labels=~Income.Group, values=~Share.Output, type='pie',
+      head(input$top_number)
+                                                        
+    plot_ly(clean13, labels=clean13$Income.Group, values=clean13[ , input$income_data], type='pie',
               textposition = 'inside',
               textinfo = 'label+percent',
               insidetextfont = list(color = '#FFFFFF'),
               hoverinfo = 'text',
-              text = ~paste(Country, 'AS AN EXAMPLE, probably nothing in here'),
+              text = ~paste("Top Country in Income Group: ", Country),
               marker = list(colors = colors,
                             line = list(color = '#FFFFFF', width = 1)),
               showlegend = FALSE)
@@ -177,10 +185,46 @@ function(input, output) {
   
   
   ### 15. World Map
-  output$worldmap = renderGvis({
-    clean %>% filter(., Year==input$worldmap_year) %>%
-      gvisGeoChart(., locationvar='Country', colorvar=input$worldmap_data,
-                   options=list(height=550,width=925,backgroundColor="white"))
-                                                    #222222 is the bg color of darkly theme, just in case
+#  output$worldmap = renderGvis({
+#    clean %>% filter(., Year==input$worldmap_year) %>%
+#      gvisGeoChart(., locationvar='Country', colorvar=input$worldmap_data,
+#                   options=list(height=550,width=925,backgroundColor="white"))
+#                                                    #222222 is the bg color of darkly theme, just in case
+#  })
+  
+  
+  
+#  output$worldmap2 = renderPlotly({
+#    
+#    clean1 = clean %>% filter(., Year==input$worldmap_year)
+#    
+#    plot_ly(data=clean1, type='choropleth', locations=clean1$Code, z=clean1[, input$worldmap_data],
+#            text=clean1$Country, colorscale="Greens")
+#    
+#  })
+  
+  
+  output$worldmap2 = renderPlotly({
+   
+    clean1 = clean %>% filter(., Year==input$worldmap_year)
+    
+    plot_geo(clean1) %>% 
+      add_trace(z = clean1[, input$worldmap_data], color = clean1[, input$worldmap_data], 
+                colors = 'Greens',
+                text = clean1$Country, 
+                locations = clean1$Code, 
+                marker = list(line = list(color = toRGB("grey"), width = 0.5))) %>% 
+      colorbar(title = '% Renewable Energy', ticksuffix = '%') %>% 
+      layout(geo = list(
+        showframe = FALSE,
+        showcoastlines = FALSE,
+        projection = list(type = 'Mercator')
+      ))
+    
   })
+  
+
+  
+  
+  
 }
