@@ -4,8 +4,7 @@ fluidPage(
   tags$head(
     tags$style(HTML("
           .navbar .navbar-header {float: right}
-        ")) #.navbar .navbar-nav {float: right} -- this went above the other HTML thing to in original paste
-            #play around with the combo of these (and taking out everything from tags$head) to see what works
+        ")) 
   ),
   navbarPage(
     title="Sustainable Energy Around the World; 1990-2015",
@@ -75,7 +74,6 @@ fluidPage(
                       "TFEC = Total Final Energy Consumption"),
                column(8,
                       plotlyOutput("worldmap2"))
-               #htmlOutput("worldmap"))
                )
 
              ), #end of HOME tabPanel
@@ -96,14 +94,6 @@ fluidPage(
                                    choices=list("Share of Output as Renewable (%)"="Share.Output",
                                                 "Share of TFEC as Renewable (%)"="Share.TFEC")
                                  ),
-#                                 br(),
-#                                 sliderInput(
-#                                   inputId="region_year",
-#                                   label="Select Year for Map:",
-#                                   min=1990, max=2015,
-#                                   value=2015,
-#                                   sep=""
-#                                 ),
                                  br(),
                                  selectizeInput(
                                    inputId="region_region",
@@ -111,12 +101,6 @@ fluidPage(
                                    choices=unique(sort(clean$Subregion))
                                  )
                                  ),
-#                          column(5,
-#                                 br(),
-#                                 br(),
-#                                 br(),
-#                                 br(),
-#                                 htmlOutput("region_map")),
                           column(10,
                                  br(),
                                  br(),

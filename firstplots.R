@@ -504,6 +504,41 @@ clean[clean$Code=="BHS", ] = clean %>% filter(., Code=="BHS") %>% mutate(., Coun
 
 
 
+#output$region_map = renderGvis({
+#  
+#  region_code=ifelse(clean[clean$Subregion==input$region_region,22][1]>100,
+#                     as.character(clean[clean$Subregion==input$region_region,22][1]),
+#                     ifelse(clean[clean$Subregion==input$region_region,22][1]<10,
+#                            paste(as.character(0), as.character(clean[clean$Subregion==input$region_region,22][1]), sep="0"),
+#                            paste(as.character(0), as.character(clean[clean$Subregion==input$region_region,22][1]), sep=""))
+#  )
+#  
+#  clean %>% filter(., Year==input$region_year, Subregion==input$region_region) %>%
+#    gvisGeoChart(., locationvar='Country', colorvar=input$region_data,
+#                 options=list(width=550,keepAspectRatio=TRUE,
+#                              region=region_code))
+#})
+
+
+
+
+#  output$worldmap = renderGvis({
+#    clean %>% filter(., Year==input$worldmap_year) %>%
+#      gvisGeoChart(., locationvar='Country', colorvar=input$worldmap_data,
+#                   options=list(height=550,width=925,backgroundColor="white"))
+#                                                    #222222 is the bg color of darkly theme, just in case
+#  })
+
+
+
+#  output$worldmap2 = renderPlotly({
+#    
+#    clean1 = clean %>% filter(., Year==input$worldmap_year)
+#    
+#    plot_ly(data=clean1, type='choropleth', locations=clean1$Code, z=clean1[, input$worldmap_data],
+#            text=clean1$Country, colorscale="Greens")
+#    
+#  })
 
 
 

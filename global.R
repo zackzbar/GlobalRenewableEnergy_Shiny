@@ -5,5 +5,5 @@ library(googleVis)
 library(tidyverse)
 library(DT)
 
-clean = read.csv("./data/Energy/clean11.csv")
+clean = read.csv("./data/clean11.csv")
 clean$X.1=NULL

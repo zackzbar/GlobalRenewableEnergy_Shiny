@@ -27,28 +27,7 @@ function(input, output) {
     tagList("Population Data Link:", url_pop)
   })
   
-  
-  
-  
 
-  ### 2. REGION MAP
-  output$region_map = renderGvis({
-    
-    region_code=ifelse(clean[clean$Subregion==input$region_region,22][1]>100,
-                       as.character(clean[clean$Subregion==input$region_region,22][1]),
-                       ifelse(clean[clean$Subregion==input$region_region,22][1]<10,
-                              paste(as.character(0), as.character(clean[clean$Subregion==input$region_region,22][1]), sep="0"),
-                              paste(as.character(0), as.character(clean[clean$Subregion==input$region_region,22][1]), sep=""))
-                       )
-    
-    clean %>% filter(., Year==input$region_year, Subregion==input$region_region) %>%
-      gvisGeoChart(., locationvar='Country', colorvar=input$region_data,
-                   options=list(width=550,keepAspectRatio=TRUE,
-                                region=region_code))
-  })
-  
-  
-  
   
   ### 3. REGION RENEWABLE SHARE OVER TIME 
   output$region_share = renderPlotly({
@@ -245,7 +224,7 @@ function(input, output) {
       arrange(., desc(eval(as.symbol(input$top_data)))) %>% 
       head(input$top_number)
                                                         
-    plot_ly(clean13, labels=clean13$Income.Group, values=clean13[ , input$income_data], type='pie',
+    plot_ly(clean13, labels=clean13$Income.Group, values=clean13[ , input$top_data], type='pie',
               textposition = 'inside',
               textinfo = 'label+percent',
               insidetextfont = list(color = '#FFFFFF'),
@@ -264,24 +243,7 @@ function(input, output) {
   
   ### 15. World Map
   
-#  output$worldmap = renderGvis({
-#    clean %>% filter(., Year==input$worldmap_year) %>%
-#      gvisGeoChart(., locationvar='Country', colorvar=input$worldmap_data,
-#                   options=list(height=550,width=925,backgroundColor="white"))
-#                                                    #222222 is the bg color of darkly theme, just in case
-#  })
-  
-  
-  
-#  output$worldmap2 = renderPlotly({
-#    
-#    clean1 = clean %>% filter(., Year==input$worldmap_year)
-#    
-#    plot_ly(data=clean1, type='choropleth', locations=clean1$Code, z=clean1[, input$worldmap_data],
-#            text=clean1$Country, colorscale="Greens")
-#    
-#  })
-  
+
   
   output$worldmap2 = renderPlotly({
    
@@ -308,7 +270,6 @@ function(input, output) {
   
   
   output$worldmap_stats_data = renderText(input$worldmap_data)
-  
   
   output$worldmap_stats_1 = renderText({
     stats = clean %>% filter(., Year==input$worldmap_year) %>% 
