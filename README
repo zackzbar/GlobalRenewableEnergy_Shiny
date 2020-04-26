@@ -1,0 +1,20 @@
+Global Renewable Energy; 1990-2015
+
+A Shiny app designed to explore Global Renewable Energy data from the World Bank's Sustainable Energy For All initiative.
+
+The main files are:
+
+ui.R, server.R, global.R - for the Shiny app
+clean11.csv - the final cleaned dataset
+
+Note - clean11.csv was downloaded from the World Bank, cleaned/edited for ease of analysis, and joined with GDP and Population datasets also downloaded from the World Bank. All links are cited in the Data page of the Shiny app.
+
+Link to Shiny app, deployed in shinyapps.io:
+
+https://zackzbar.shinyapps.io/GlobalRenewableEnergy1990-2015/
+
+This project was created during the NYC Data Science Academy Spring 2020 Data Science Bootcamp.
+
+Thank you to everyone who helped along the way!
+
+-ZZ
